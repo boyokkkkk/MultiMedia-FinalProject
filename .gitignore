@@ -1,0 +1,14 @@
+data/
+
+*.asv
+*.m~
+*.mat
+
+*.mexw64
+*.mexa64
+*.mexmaci64
+*.o
+*.obj
+
+.DS_Store
+Thumbs.db
