@@ -2,8 +2,9 @@ clear; clc; close all;
 
 addpath(genpath(pwd));
 
-origin_dir = './data/wechat_test_covers';
-wechat_dir = './data/wechat_downloaded';
+qf_folder = 'qf100_jp'; % 每次根据具体测试填写
+origin_dir = fullfile('./data/wechat_test_covers', qf_folder);
+wechat_dir = fullfile('./data/wechat_downloaded', qf_folder);
 
 origin_files = dir(fullfile(origin_dir, '*.jpg'));
 num_files = length(origin_files);
@@ -18,11 +19,11 @@ is_qt_consistent = true;
 valid_count = 0;
 
 for i = 1: num_files
-    origin_name = origin_files(i).name
+    origin_name = origin_files(i).name;
     origin_path = fullfile(origin_dir, origin_name);
     [~, name_base, ext] = fileparts(origin_name);
 
-    wechat_path_1 = fullfile(wechat_dir, [name_base, '_downloaded', ext]);
+    wechat_path_1 = fullfile(wechat_dir, [name_base, '_stego', ext]);
     wechat_path_2 = fullfile(wechat_dir, origin_name);
 
     if exist(wechat_path_1, 'file')
@@ -35,18 +36,18 @@ for i = 1: num_files
     end
 
     origin_struct = jpeg_read(origin_path);
-    wechat_strcut = jpeg_read(wechat_path);
+    wechat_struct = jpeg_read(wechat_path);
 
-    if origin_struct.image_width ~= wechat_strcut.image_width || origin_struct.image_height ~= wechat_strcut.image_height
+    if origin_struct.image_width ~= wechat_struct.image_width || origin_struct.image_height ~= wechat_struct.image_height
         fprintf('图片%s发生尺寸缩放(%dx%d -> %dx%d)\n', ...
-            origin_name, origin_struct.image_width, origin_struct,image_height, ...
-            wechat_strcut.image_width, wechat_strcut.image_height);
+            origin_name, origin_struct.image_width, origin_struct.image_height, ...
+            wechat_struct.image_width, wechat_struct.image_height);
     else
         fprintf('图片%s 尺寸一致。\n', origin_name);
     end
 
     origin_qt = origin_struct.quant_tables{1};
-    wechat_qt = wechat_strcut.quant_tables{1};
+    wechat_qt = wechat_struct.quant_tables{1};
 
     valid_count = valid_count + 1;
     all_wechat_qts(:, :, valid_count) = wechat_qt;

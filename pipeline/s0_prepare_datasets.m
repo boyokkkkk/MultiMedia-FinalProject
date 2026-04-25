@@ -1,13 +1,13 @@
 clear; clc;
 
-qf_target = 75;
+qf_target = 100; % 在这里调整压缩画质
 target_size = [512, 512];
 
 boss_raw_dir = './data/BOSSbase_1.01';
-boss_out_dir = './data/BOSSbase_qf75';
+boss_out_dir = './data/BOSSbase_qf100'; % 文件名也需要调整
 
 ucid_raw_dir = './data/UCID-1338';
-ucid_out_dir = './data/UCID_qf75';
+ucid_out_dir = './data/UCID_qf100'; % 文件名也需要调整
 
 if ~exist(boss_out_dir, 'dir'), mkdir(boss_out_dir); end
 if ~exist(ucid_out_dir, 'dir'), mkdir(ucid_out_dir); end
