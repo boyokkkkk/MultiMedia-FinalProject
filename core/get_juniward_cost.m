@@ -21,14 +21,11 @@ function rho = get_juniward_cost(cover_jpg)
     Fv = hpdf' * lpdf;
     Fd = hpdf' * hpdf;
 
-    % ===================== 工具箱函数 imfilter =====================
     R_h = imfilter(img, Fh, 'symmetric');
     R_v = imfilter(img, Fv, 'symmetric');
     R_d = imfilter(img, Fd, 'symmetric');
 
     % 代价
     rho = abs(R_h) + abs(R_v) + abs(R_d);
-    
-    % ===================== 工具箱函数 imresize =====================
     rho = imresize(rho, size(coef)); 
 end
