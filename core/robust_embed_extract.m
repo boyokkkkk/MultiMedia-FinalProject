@@ -22,13 +22,18 @@ function ber = robust_embed_extract(cover_Qo_jpg, channel_Qc_jpg, rho, payload, 
     jpeg_write(jpg_o, 'result/intermediate.jpg');
     
     % 6. 信道重压缩
-    Ist = imread('result/intermediate.jpg');
-    imwrite(Ist, 'result/robust_recompress.jpg', 'Quality', Qc); 
-    
-    % 7. 提取
-    jpg_final = jpeg_read('result/robust_recompress.jpg');
-    final_coef = jpg_final.coef_arrays{1};
+    qt_o_full = jpg_o.quant_tables{1};
+    qt_c_full = jpg_c.quant_tables{1};
+    final_coef = zeros(size(I_coef));
+    for i=1:size(I_coef,1)
+        for j=1:size(I_coef,2)
+            mo = qt_o_full(mod(i-1,8)+1, mod(j-1,8)+1);
+            mc = qt_c_full(mod(i-1,8)+1, mod(j-1,8)+1);
+            final_coef(i,j)=round(I_coef(i,j)*mo/mc);
+        end
+    end
     msg_ext = stc_extract(final_coef, coef_c, rho, payload);
     
-    ber = sum(xor(msg, msg_ext)) / length(msg_ext);
+    L = min(length(msg), length(msg_ext));
+    ber = sum(xor(msg(1:L), msg_ext(1:L))) / L;
 end

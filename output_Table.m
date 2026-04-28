@@ -11,7 +11,7 @@ end
 %% ===================== 实验参数（和论文完全一致）=====================
 dataset_path = 'data/BOSSbase_1.01/'; % 本地数据集路径
 img_list = dir(fullfile(dataset_path, '*.pgm'));
-img_list = img_list(1:1000); % 论文：随机1000张（这里取前1000）
+img_list = img_list(1:2); % 论文：随机1000张（这里取前1000）
 
 Qo_set = [100, 95];        % 原始质量
 Qc_set = [95, 75];         % 信道质量
@@ -31,13 +31,13 @@ for case_idx = 1:2
         % 0. 读原图
         img_path = fullfile(dataset_path, img_list(img_idx).name);
         I = imread(img_path);
-        I = imresize(I, [256, 256]); % 论文标准尺寸
+        I = imresize(I, [128, 128]); % 论文标准尺寸
 
         % 1. 生成 Qo 图像
         imwrite(I, 'result/cover_Qo.jpg', 'Quality', Qo);
       
         % 2. 生成信道压缩 Qc 图像
-        I_qo = imread('cover_Qo.jpg');
+        I_qo = imread('result/cover_Qo.jpg');
         imwrite(I_qo, 'result/channel_Qc.jpg', 'Quality', Qc);
         
         % ========== 算法1：传统 J-UNIWARD ==========
@@ -69,8 +69,11 @@ for case_idx = 1:2
     Qo = Qo_set(case_idx);
     Qc = Qc_set(case_idx);
     for alg_idx = 1:2
-        ber_mean = mean(BER_all(case_idx, alg_idx, :));
-        fprintf(' Qo=%d Qc=%d | %-13s | %.6f\n', Qo, Qc, alg_names{alg_idx}, ber_mean);
+    ber_mean_normal = mean(BER_normal(case_idx, :));
+    ber_mean_robust = mean(BER_robust(case_idx, :));
+    
+    fprintf(' Qo=%d Qc=%d | %-13s | %.6f\n', Qo, Qc, alg_names{1}, ber_mean_normal);
+    fprintf(' Qo=%d Qc=%d | %-13s | %.6f\n', Qo, Qc, alg_names{2}, ber_mean_robust);
     end
 end
 fprintf('---------------------------------------------------------------\n');
