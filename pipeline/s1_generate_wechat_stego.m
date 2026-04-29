@@ -1,6 +1,6 @@
 clear; clc; addpath(genpath(pwd));
 
-qf_folder = 'qf100_jp';
+qf_folder = 'qf100';
 input_dir = fullfile('./data/wechat_test_covers', qf_folder);
 output_dir = fullfile('./data/wechat_stego_out', qf_folder);
 if ~exist(output_dir, 'dir'), mkdir(output_dir); end

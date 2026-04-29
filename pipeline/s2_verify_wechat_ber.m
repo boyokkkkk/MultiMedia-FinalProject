@@ -1,6 +1,6 @@
 clear; clc; addpath(genpath(pwd));
 
-qf_folder = 'qf100_jp';
+qf_folder = 'qf752_0.2';ay
 wechat_dir = fullfile('./data/wechat_downloaded/', qf_folder);
 backup_dir = fullfile('./data/wechat_stego_out/', qf_folder);
 files = dir(fullfile(wechat_dir, '*.jpg'));

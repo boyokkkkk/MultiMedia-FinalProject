@@ -2,7 +2,7 @@ clear; clc; close all;
 
 addpath(genpath(pwd));
 
-qf_folder = 'qf100_jp'; % 每次根据具体测试填写
+qf_folder = 'qf752_0.1'; % 每次根据具体测试填写
 origin_dir = fullfile('./data/wechat_test_covers', qf_folder);
 wechat_dir = fullfile('./data/wechat_downloaded', qf_folder);
 
