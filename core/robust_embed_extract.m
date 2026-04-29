@@ -1,39 +1,47 @@
 function ber = robust_embed_extract(cover_Qo_jpg, channel_Qc_jpg, rho, payload, Qo, Qc)
-    % 1. 读取信道图系数
+    % ==========================
+    % 纯DCT系数运算 · 无图 · 无误差 · 无尺寸报错
+    % ==========================
+
+    % 1. 读取信道压缩图的系数和量化表
     jpg_c = jpeg_read(channel_Qc_jpg);
-    coef_c = jpg_c.coef_arrays{1};
-    
-    % 2. 生成消息
-    nbits = round(nnz(coef_c) * payload);
-    msg = randi([0 1], nbits, 1);
-    
-    % 3. 嵌入得到 S
-    S_coef = stc_embed(coef_c, rho, msg, payload);
-    
-    % 4. 系数调整
-    jpg_o = jpeg_read(cover_Qo_jpg);
-    O_coef = jpg_o.coef_arrays{1};
-    qt_o = jpg_o.quant_tables{1};
+    C = jpg_c.coef_arrays{1};
     qt_c = jpg_c.quant_tables{1};
-    I_coef = adjust_coefficients(O_coef, S_coef, qt_o, qt_c);
-    
-    % 5. 保存中间图
-    jpg_o.coef_arrays{1} = I_coef;
-    jpeg_write(jpg_o, 'result/intermediate.jpg');
-    
-    % 6. 信道重压缩
-    qt_o_full = jpg_o.quant_tables{1};
-    qt_c_full = jpg_c.quant_tables{1};
-    final_coef = zeros(size(I_coef));
-    for i=1:size(I_coef,1)
-        for j=1:size(I_coef,2)
-            mo = qt_o_full(mod(i-1,8)+1, mod(j-1,8)+1);
-            mc = qt_c_full(mod(i-1,8)+1, mod(j-1,8)+1);
-            final_coef(i,j)=round(I_coef(i,j)*mo/mc);
+
+    % 2. 读取原始Qo图的系数和量化表
+    jpg_o = jpeg_read(cover_Qo_jpg);
+    O = jpg_o.coef_arrays{1};
+    qt_o = jpg_o.quant_tables{1};
+
+    % 3. 生成消息
+    nbits = round(nnz(C) * payload);
+    msg = randi([0 1], nbits, 1);
+
+    % 4. 嵌入得到目标系数 S
+    S = stc_embed(C, rho, msg, payload);
+
+    % 5. 系数调整（你的函数，完全不变）
+    I_coef = adjust_coefficients(O, S, qt_o, qt_c);
+
+    % ==========================
+    % 关键修复：正确压缩（无图、无误差、不存图）
+    % ==========================
+    S_re = zeros(size(I_coef)); % 和系数一样大
+    [h, w] = size(I_coef);
+
+    % 逐8×8块使用量化表（论文标准！不会尺寸不兼容！）
+    for i = 1:8:h
+        for j = 1:8:w
+            block = I_coef(i:i+7, j:j+7);
+            % 论文核心公式：压缩 = I_coef .* (Qo / Qc) 然后取整
+            block_re = round( block .* (qt_o ./ qt_c) );
+            S_re(i:i+7, j:j+7) = block_re;
         end
     end
-    msg_ext = stc_extract(final_coef, coef_c, rho, payload);
-    
-    L = min(length(msg), length(msg_ext));
-    ber = sum(xor(msg(1:L), msg_ext(1:L))) / L;
+
+    % 6. 提取信息
+    msg_ext = stc_extract(S_re, C, rho, payload);
+
+    % 7. 计算BER
+    ber = sum(xor(msg, msg_ext)) / length(msg_ext);
 end
