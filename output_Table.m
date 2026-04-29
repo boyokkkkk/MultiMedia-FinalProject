@@ -9,13 +9,13 @@ if ~exist('result', 'dir')
 end
 
 %% ===================== 实验参数（和论文完全一致）=====================
-dataset_path = 'data/UCID/'; % 本地数据集路径
-img_list = dir(fullfile(dataset_path, '*.tif'));
-img_list = img_list(1:5); % 论文：随机1000张（这里取前1000）
+dataset_path = 'data/BOSSbase_1.01/'; % 本地数据集路径
+img_list = dir(fullfile(dataset_path, '*.pgm'));
+img_list = img_list(1:1000); % 论文：随机1000张（这里取前1000）
 
 Qo_set = [100, 95];        % 原始质量
 Qc_set = [95, 75];         % 信道质量
-payload = 0.5;        %  0.05 : 0.1 : 0.2 : 0.3 : 0.4 : 0.5 
+payload = 0.05;        %  0.05 : 0.1 : 0.2 : 0.3 : 0.4 : 0.5 
 
 % 保存 BER
 BER_normal = zeros(2, length(img_list));
@@ -31,7 +31,7 @@ for case_idx = 1:2
         % 0. 读原图
         img_path = fullfile(dataset_path, img_list(img_idx).name);
         I = imread(img_path);
-        I = rgb2gray(I);    % UCID彩色变灰色
+        % I = rgb2gray(I);    % UCID彩色变灰色
         I = imresize(I, [256, 256]); % 论文标准尺寸
 
         % 1. 生成 Qo 图像
@@ -42,9 +42,9 @@ for case_idx = 1:2
         [ber_normal] = embed_extract('result/cover_Qo.jpg', rho_normal, payload, Qc);
 
         % ========== 算法2：鲁棒 J-UNIWARD-P ==========
-        %rho_robust = get_juniward_p_cost('result/cover_Qo.jpg');
-        [ber_robust] = 0.0000;
-        
+        rho_robust = get_juniward_p_cost('result/cover_Qo.jpg');
+        [ber_robust] = robust_embed_extract('result/cover_Qo.jpg', rho_robust, payload, Qo, Qc);
+
         % 保存 BER
         BER_normal(case_idx, img_idx) = ber_normal;
         BER_robust(case_idx, img_idx) = ber_robust;
@@ -56,7 +56,7 @@ end
 
 %% ===================== 输出论文 Table I =====================
 fprintf('\n===================== 论文 Table I 复现结果 =====================\n');
-fprintf('数据集：UCID  payload: %.2f\n',payload);
+fprintf('数据集：BOSSbase-1.01  payload: %.2f\n',payload);
 fprintf('------------------------------------------------------------\n');
 fprintf('设置        | 算法          | 平均BER\n');
 fprintf('------------------------------------------------------------\n');
