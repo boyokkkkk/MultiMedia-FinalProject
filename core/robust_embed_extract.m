@@ -1,7 +1,4 @@
 function ber = robust_embed_extract(cover_Qo_jpg, channel_Qc_jpg, rho, payload, Qo, Qc)
-    % ==========================
-    % 纯DCT系数运算 · 无图 · 无误差 · 无尺寸报错
-    % ==========================
 
     % 1. 读取信道压缩图的系数和量化表
     jpg_c = jpeg_read(channel_Qc_jpg);
@@ -20,16 +17,14 @@ function ber = robust_embed_extract(cover_Qo_jpg, channel_Qc_jpg, rho, payload, 
     % 4. 嵌入得到目标系数 S
     S = stc_embed(C, rho, msg, payload);
 
-    % 5. 系数调整（你的函数，完全不变）
+    % 5. 系数调整
     I_coef = adjust_coefficients(O, S, qt_o, qt_c);
 
-    % ==========================
-    % 关键修复：正确压缩（无图、无误差、不存图）
-    % ==========================
-    S_re = zeros(size(I_coef)); % 和系数一样大
+    % 关键修改：直接计算，不保存图片
+    S_re = zeros(size(I_coef)); 
     [h, w] = size(I_coef);
 
-    % 逐8×8块使用量化表（论文标准！不会尺寸不兼容！）
+    % 逐8×8块使用量化表
     for i = 1:8:h
         for j = 1:8:w
             block = I_coef(i:i+7, j:j+7);
